@@ -2,9 +2,13 @@ package queue
 
 import (
 	"encoding/binary"
-	"log"
 	"time"
 )
+
+// Logger is invoked when `Config.Verbose=true`
+type Logger interface {
+	Printf(format string, v ...interface{})
+}
 
 const (
 	// Number of bytes to encode 0 in uvarint format
@@ -32,6 +36,7 @@ type BytesQueue struct {
 	rightMargin  int
 	headerBuffer []byte
 	verbose      bool
+	logger       Logger
 }
 
 type queueError struct {
@@ -60,7 +65,7 @@ func getNeededSize(length int) int {
 // NewBytesQueue initialize new bytes queue.
 // capacity is used in bytes array allocation
 // When verbose flag is set then information about memory allocation are printed
-func NewBytesQueue(capacity int, maxCapacity int, verbose bool) *BytesQueue {
+func NewBytesQueue(capacity int, maxCapacity int, verbose bool, logger Logger) *BytesQueue {
 	return &BytesQueue{
 		array:        make([]byte, capacity),
 		capacity:     capacity,
@@ -70,6 +75,7 @@ func NewBytesQueue(capacity int, maxCapacity int, verbose bool) *BytesQueue {
 		head:         leftMarginIndex,
 		rightMargin:  leftMarginIndex,
 		verbose:      verbose,
+		logger:       logger,
 	}
 }
 
@@ -135,7 +141,7 @@ func (q *BytesQueue) allocateAdditionalMemory(minimum int) {
 	q.full = false
 
 	if q.verbose {
-		log.Printf("Allocated new queue in %s; Capacity: %d \n", time.Since(start), q.capacity)
+		q.logger.Printf("Allocated new queue in %s; Capacity: %d \n", time.Since(start), q.capacity)
 	}
 }
 

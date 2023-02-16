@@ -9,11 +9,13 @@ import (
 	"testing"
 )
 
+var ml = &mockedLogger{}
+
 func TestPushAndPop(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(10, 0, true)
+	queue := NewBytesQueue(10, 0, true, ml)
 	entry := []byte("hello")
 
 	// when
@@ -33,7 +35,7 @@ func TestLen(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 	entry := []byte("hello")
 	assertEqual(t, 0, queue.Len())
 
@@ -48,7 +50,7 @@ func TestPeek(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 	entry := []byte("hello")
 
 	// when
@@ -75,7 +77,7 @@ func TestResetFullQueue(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(10, 20, false)
+	queue := NewBytesQueue(10, 20, false, ml)
 
 	// when
 	queue.Push(blob('a', 3))
@@ -101,7 +103,7 @@ func TestReset(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 	entry := []byte("hello")
 
 	// when
@@ -137,7 +139,7 @@ func TestReuseAvailableSpace(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 70))
@@ -154,7 +156,7 @@ func TestAllocateAdditionalSpace(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(11, 0, false)
+	queue := NewBytesQueue(11, 0, false, ml)
 
 	// when
 	queue.Push([]byte("hello1"))
@@ -168,7 +170,7 @@ func TestAllocateAdditionalSpaceForInsufficientFreeFragmentedSpaceWhereHeadIsBef
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(25, 0, false)
+	queue := NewBytesQueue(25, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 3)) // header + entry + left margin = 5 bytes
@@ -186,7 +188,7 @@ func TestUnchangedEntriesIndexesAfterAdditionalMemoryAllocationWhereHeadIsBefore
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(25, 0, false)
+	queue := NewBytesQueue(25, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 3))                   // header + entry + left margin = 5 bytes
@@ -204,7 +206,7 @@ func TestAllocateAdditionalSpaceForInsufficientFreeFragmentedSpaceWhereTailIsBef
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 70)) // header + entry + left margin = 72 bytes
@@ -228,7 +230,7 @@ func TestAllocateAdditionalSpaceForInsufficientFreeFragmentedSpaceWhereTailIsBef
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(200, 0, false)
+	queue := NewBytesQueue(200, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 30))  //  header + entry + left margin = 32 bytes
@@ -253,7 +255,7 @@ func TestUnchangedEntriesIndexesAfterAdditionalMemoryAllocationWhereTailIsBefore
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(100, 0, false)
+	queue := NewBytesQueue(100, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 70))                   // header + entry + left margin = 72 bytes
@@ -272,7 +274,7 @@ func TestAllocateAdditionalSpaceForValueBiggerThanInitQueue(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(11, 0, false)
+	queue := NewBytesQueue(11, 0, false, ml)
 
 	// when
 	queue.Push(blob('a', 100))
@@ -286,7 +288,7 @@ func TestAllocateAdditionalSpaceForValueBiggerThanQueue(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(21, 0, false)
+	queue := NewBytesQueue(21, 0, false, ml)
 
 	// when
 	queue.Push(make([]byte, 2))
@@ -305,7 +307,7 @@ func TestPopWholeQueue(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(13, 0, false)
+	queue := NewBytesQueue(13, 0, false, ml)
 
 	// when
 	queue.Push([]byte("a"))
@@ -323,7 +325,7 @@ func TestGetEntryFromIndex(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(20, 0, false)
+	queue := NewBytesQueue(20, 0, false, ml)
 
 	// when
 	queue.Push([]byte("a"))
@@ -339,7 +341,7 @@ func TestGetEntryFromInvalidIndex(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(1, 0, false)
+	queue := NewBytesQueue(1, 0, false, ml)
 	queue.Push([]byte("a"))
 
 	// when
@@ -356,7 +358,7 @@ func TestGetEntryFromIndexOutOfRange(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(1, 0, false)
+	queue := NewBytesQueue(1, 0, false, ml)
 	queue.Push([]byte("a"))
 
 	// when
@@ -373,7 +375,7 @@ func TestGetEntryFromEmptyQueue(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(13, 0, false)
+	queue := NewBytesQueue(13, 0, false, ml)
 
 	// when
 	result, err := queue.Get(1)
@@ -389,7 +391,7 @@ func TestMaxSizeLimit(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(30, 50, false)
+	queue := NewBytesQueue(30, 50, false, ml)
 
 	// when
 	queue.Push(blob('a', 25))
@@ -408,7 +410,7 @@ func TestPushEntryAfterAllocateAdditionMemory(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(9, 20, true)
+	queue := NewBytesQueue(9, 20, true, ml)
 
 	// when
 	queue.Push([]byte("aaa"))
@@ -429,7 +431,7 @@ func TestPushEntryAfterAllocateAdditionMemoryInFull(t *testing.T) {
 	t.Parallel()
 
 	// given
-	queue := NewBytesQueue(9, 40, true)
+	queue := NewBytesQueue(9, 40, true, ml)
 
 	// when
 	queue.Push([]byte("aaa"))
@@ -507,4 +509,14 @@ func objectsAreEqual(expected, actual interface{}) bool {
 		return exp == nil && act == nil
 	}
 	return bytes.Equal(exp, act)
+}
+
+type mockedLogger struct {
+	lastFormat string
+	lastArgs   []interface{}
+}
+
+func (ml *mockedLogger) Printf(format string, v ...interface{}) {
+	ml.lastFormat = format
+	ml.lastArgs = v
 }

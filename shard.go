@@ -440,7 +440,7 @@ func initNewShard(config Config, callback onRemoveCallback, clock clock) *cacheS
 	return &cacheShard{
 		hashmap:      make(map[uint64]uint32, config.initialShardSize()),
 		hashmapStats: make(map[uint64]uint32, config.initialShardSize()),
-		entries:      *queue.NewBytesQueue(bytesQueueInitialCapacity, maximumShardSizeInBytes, config.Verbose),
+		entries:      *queue.NewBytesQueue(bytesQueueInitialCapacity, maximumShardSizeInBytes, config.Verbose, newLogger(config.Logger)),
 		entryBuffer:  make([]byte, config.MaxEntrySize+headersSizeInBytes),
 		onRemove:     callback,
 
